@@ -15,7 +15,6 @@ def calculate_total_cost(path, matrix):
 def format_elapsed_time(elapsed_time):
     return round(elapsed_time, 6)
 
-
 # //! Pohlepna pretraga po dubini - Agent Uki
 def calculatePathUKI(prices):
     start_time = time.time()
