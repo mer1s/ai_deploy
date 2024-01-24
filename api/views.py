@@ -1,6 +1,7 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
 import heapq
+from itertools import permutations
 
 @api_view(['POST'])
 def get_path(request):
@@ -42,25 +43,11 @@ def calculate_path_uki(prices):
 
 def calculate_path_jocke(prices):
     nodes = list(range(1, len(prices)))
-    min_cost, min_path = float('inf'), None
+    min_path = min(
+        (calculate_total_cost([0] + perm, prices), [0] + perm) for perm in permutations(nodes)
+    )
 
-    for perm in generate_permutations(nodes):
-        path = [0] + perm
-        cost = calculate_total_cost(path, prices)
-
-        if cost < min_cost:
-            min_cost, min_path = cost, path
-
-    return {"minPath": min_path, "pathCost": min_cost}
-
-def generate_permutations(elements):
-    if not elements:
-        yield []
-    else:
-        for i in range(len(elements)):
-            rest = elements[:i] + elements[i + 1:]
-            for p in generate_permutations(rest):
-                yield [elements[i]] + p
+    return {"minPath": min_path[1], "pathCost": min_path[0]}
 
 def calculate_path_aki(prices):
     visited, collected_gold = {0}, []
@@ -74,7 +61,8 @@ def calculate_path_aki(prices):
         if len(visited) == len(prices):
             current_path.append(0)
             if not collected_gold or len(current_path) > len(collected_gold[-1]):
-                collected_gold = [current_path]
+                collected_gold.clear()
+                collected_gold.append(current_path)
             elif len(current_path) == len(collected_gold[-1]):
                 collected_gold.append(current_path)
             return
