@@ -1,15 +1,26 @@
 from django.http import JsonResponse
 from rest_framework.decorators import api_view
-from .utils import calculate_path
+from .utils import calculatePathAKI, calculatePathMICKO, calculatePathUKI, calculatePathJOCKE
 
 @api_view(['POST'])
-def get_path(request):
+def getPath(request):
     agent_name = request.data.get('agent')
     prices = request.data.get('prices')
 
-    if not agent_name or agent_name.lower() not in ['aki', 'jocke', 'micko', 'uki']:
-        return JsonResponse({"error": "Unknown or missing agent name"}, status=400)
+    if agent_name:
+        agent_name = agent_name.lower()
+        if agent_name == 'aki':
+            result = calculatePathAKI(prices)
+        elif agent_name == 'jocke':
+            result = calculatePathJOCKE(prices)
+        elif agent_name == 'micko':
+            result = calculatePathMICKO(prices)
+        elif agent_name == 'uki':
+            result = calculatePathUKI(prices)
+        else:
+            result = {"error": "Unknown agent"}
 
-    agent_name = agent_name.lower()
-    result = calculate_path(agent_name, prices)
-    return JsonResponse(result, safe=False)
+        return JsonResponse(result, safe=False)
+    else:
+        return JsonResponse({"error": "Agent name not provided"}, status=400)
+
